@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@netlify/blobs": "^8.1.0",
     "bcryptjs": "^2.4.3",
     "iron-session": "^8.0.4",
     "next": "^15.3.0",

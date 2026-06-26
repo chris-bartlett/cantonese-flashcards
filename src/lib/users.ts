@@ -1,30 +1,22 @@
-import fs from "fs/promises";
-import path from "path";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import type { User, SafeUser } from "./types";
+import { getStorage } from "./storage";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
+const store = getStorage("users");
 const SALT_ROUNDS = 12;
 
-async function ensureDataDir() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-}
-
+/**
+ * All users are stored under a single "all" key as a JSON array.
+ * Fine for a small user base; swap for per-user keys if it grows.
+ */
 async function readUsers(): Promise<User[]> {
-  await ensureDataDir();
-  try {
-    const raw = await fs.readFile(USERS_FILE, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  const raw = await store.get("all");
+  return raw ? JSON.parse(raw) : [];
 }
 
 async function writeUsers(users: User[]): Promise<void> {
-  await ensureDataDir();
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
+  await store.set("all", JSON.stringify(users));
 }
 
 export function toSafeUser(user: User): SafeUser {
